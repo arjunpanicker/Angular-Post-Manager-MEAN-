@@ -5,6 +5,7 @@ import { PostCreateComponent } from './post-create/post-create.component';
 import { AppMaterialModule } from '../material.module';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
+import { PostRoutingModule } from './post-routing.module';
 
 
 
@@ -12,6 +13,7 @@ import { HttpClientModule } from '@angular/common/http';
   declarations: [PostListComponent, PostCreateComponent],
   imports: [
     CommonModule,
+    PostRoutingModule,
     FormsModule,
     AppMaterialModule,
     HttpClientModule
