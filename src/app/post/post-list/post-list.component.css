@@ -1,0 +1,9 @@
+.post-display {
+  width: 70%;
+  margin: 1rem auto;
+  display: flex;
+}
+
+mat-accordion {
+  width: 100%;
+}
