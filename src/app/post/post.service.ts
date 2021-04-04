@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { PostModule } from './post.module';
 import { Subject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Post } from '../models/post.interface';
 
 @Injectable({
@@ -18,18 +18,38 @@ export class PostService {
   }
 
   public fetchPosts() {
-    this.http.get<{data: Post[]}>('http://localhost:3000/posts')
-      .subscribe(res => {
-        this.posts = res.data;
+    this.http.get('http://localhost:3000/posts')
+      .pipe(map((postData: any[]) => {
+        return postData.map(post => {
+          return {
+            title: post.title,
+            content: post.content,
+            id: post._id
+          };
+        });
+      }))
+      .subscribe(transformedPosts => {
+        this.posts = transformedPosts;
         this.isPostAvailable.next([...this.posts]);
       });
   }
 
   public addPost(post: Post) {
-    this.http.post<{message: string}>('http://localhost:3000/post', post)
+    this.http.post<{message: string, postId: string}>('http://localhost:3000/post', post)
       .subscribe((res) => {
         console.log(res.message)
-        this.fetchPosts();
+        post.id = res.postId;
+        this.posts.push(post);
+        this.isPostAvailable.next([...this.posts]);
+      });
+  }
+
+  public deletePost(postId: string) {
+    this.http.delete('http://localhost:3000/posts/' + postId)
+      .subscribe((res) => {
+        console.log("Deleted!");
+        this.posts = this.posts.filter(post => post.id !== postId);
+        this.isPostAvailable.next([...this.posts]);
       });
   }
 }

@@ -1,20 +1,18 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const mongoose = require('mongoose');
+
+const Post = require('./models/post');
 
 const app = express();
 
-const posts = [
-    {
-        id: "123nklasdf",
-        title: "First Post",
-        content: "First post content."
-    },
-    {
-        id: "234sdfgdfsg",
-        title: "Second Post",
-        content: "Second post content."
-    }
-];
+mongoose.connect('mongodb+srv://inferno:g8c7IDN5Mi5LDxr6@cluster0.1p50o.mongodb.net/post-manager?retryWrites=true&w=majority', 
+    {useNewUrlParser: true, useUnifiedTopology: true}).then((res) => {
+        console.log('Connected to database!!');
+    })
+    .catch((err) => {
+        console.error('Connection Failed!!');
+    });
 
 app.use(bodyParser.json());
 
@@ -32,17 +30,36 @@ app.use((req, res, next) => {
 });
 
 app.post("/post", (req, res, next) => {
-    const post = req.body;
-    posts.push(post);
-    res.status(201).json({
-        message: 'Post added successfully'
+    const post = new Post({
+        title: req.body.title,
+        content: req.body.content
+    });
+    post.save().then((createdPost) => {
+        res.status(201).json({  
+            message: 'Post added successfully',
+            postId: createdPost._id
+        });
     });
 });
 
 app.get("/posts", (req, res, next) => {
-    res.json({
-        data: posts
-    });
+    Post.find()
+        .then((documents) => {
+            res.json(documents);
+        });
 });
+
+app.delete("/posts/:id", (req, res, next) => {
+    Post.deleteOne({_id: req.params.id})
+        .then((result) => {
+            console.log(result);
+            res.status(200).json({
+                message: "Post Deleted!"
+            });
+        })
+        .catch((err) => {
+
+        });
+})
 
 module.exports = app;
